@@ -1,0 +1,4 @@
+comment = 'TopN extension for frequency counting and analysis'
+default_version = '1.0'
+module_pathname = '$libdir/topn'
+relocatable = true
