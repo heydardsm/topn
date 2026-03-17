@@ -1,0 +1,393 @@
+CREATE EXTENSION IF NOT EXISTS topn;
+BEGIN;
+SELECT '=== Starting TopN Extension Tests ===' as test_log;
+               test_log                
+---------------------------------------
+ === Starting TopN Extension Tests ===
+(1 row)
+
+SELECT 'Test 1: Version Function' as test_log;
+         test_log         
+--------------------------
+ Test 1: Version Function
+(1 row)
+
+SELECT topn_version();
+            topn_version            
+------------------------------------
+ TopN Extension v1.0 (SQL+C hybrid)
+(1 row)
+
+SELECT 'Test 2: Create namespace with default types (varchar(256))' as test_log;
+                          test_log                          
+------------------------------------------------------------
+ Test 2: Create namespace with default types (varchar(256))
+(1 row)
+
+SELECT topn_create_namespace('test1');
+ topn_create_namespace 
+-----------------------
+ topn_test1
+(1 row)
+
+SELECT 'Table created:' as info, tablename FROM pg_tables WHERE tablename = 'topn_test1';
+      info      | tablename  
+----------------+------------
+ Table created: | topn_test1
+(1 row)
+
+SELECT 'Table structure:' as info, column_name, data_type, character_maximum_length FROM information_schema.columns WHERE table_name = 'topn_test1' ORDER BY ordinal_position;
+       info       | column_name |     data_type     | character_maximum_length 
+------------------+-------------+-------------------+--------------------------
+ Table structure: | uid         | character varying |                      256
+ Table structure: | key         | character varying |                      256
+ Table structure: | frequently  | bigint            |                         
+(3 rows)
+
+SELECT 'Test 3: Create namespace with integer uid, varchar key' as test_log;
+                        test_log                        
+--------------------------------------------------------
+ Test 3: Create namespace with integer uid, varchar key
+(1 row)
+
+SELECT topn_create_namespace('test2', 'integer', 'varchar(100)');
+ topn_create_namespace 
+-----------------------
+ topn_test2
+(1 row)
+
+SELECT 'Table created:' as info, tablename FROM pg_tables WHERE tablename = 'topn_test2';
+      info      | tablename  
+----------------+------------
+ Table created: | topn_test2
+(1 row)
+
+SELECT 'Table structure:' as info, column_name, data_type, character_maximum_length FROM information_schema.columns WHERE table_name = 'topn_test2' ORDER BY ordinal_position;
+       info       | column_name |     data_type     | character_maximum_length 
+------------------+-------------+-------------------+--------------------------
+ Table structure: | uid         | integer           |                         
+ Table structure: | key         | character varying |                      100
+ Table structure: | frequently  | bigint            |                         
+(3 rows)
+
+SELECT 'Test 4: Create namespace with date uid, varchar key' as test_log;
+                      test_log                       
+-----------------------------------------------------
+ Test 4: Create namespace with date uid, varchar key
+(1 row)
+
+SELECT topn_create_namespace('test3', 'date', 'varchar(100)');
+ topn_create_namespace 
+-----------------------
+ topn_test3
+(1 row)
+
+SELECT 'Table created:' as info, tablename FROM pg_tables WHERE tablename = 'topn_test3';
+      info      | tablename  
+----------------+------------
+ Table created: | topn_test3
+(1 row)
+
+SELECT 'Table structure:' as info, column_name, data_type, character_maximum_length FROM information_schema.columns WHERE table_name = 'topn_test3' ORDER BY ordinal_position;
+       info       | column_name |     data_type     | character_maximum_length 
+------------------+-------------+-------------------+--------------------------
+ Table structure: | uid         | date              |                         
+ Table structure: | key         | character varying |                      100
+ Table structure: | frequently  | bigint            |                         
+(3 rows)
+
+SELECT 'Test 5: Create namespace with uuid uid, integer key' as test_log;
+                      test_log                       
+-----------------------------------------------------
+ Test 5: Create namespace with uuid uid, integer key
+(1 row)
+
+SELECT topn_create_namespace('test4', 'uuid', 'integer');
+ topn_create_namespace 
+-----------------------
+ topn_test4
+(1 row)
+
+SELECT 'Table created:' as info, tablename FROM pg_tables WHERE tablename = 'topn_test4';
+      info      | tablename  
+----------------+------------
+ Table created: | topn_test4
+(1 row)
+
+SELECT 'Table structure:' as info, column_name, data_type, character_maximum_length FROM information_schema.columns WHERE table_name = 'topn_test4' ORDER BY ordinal_position;
+       info       | column_name | data_type | character_maximum_length 
+------------------+-------------+-----------+--------------------------
+ Table structure: | uid         | uuid      |                         
+ Table structure: | key         | integer   |                         
+ Table structure: | frequently  | bigint    |                         
+(3 rows)
+
+SELECT 'Test 6: Create namespace with timestamp uid, bigint key' as test_log;
+                        test_log                         
+---------------------------------------------------------
+ Test 6: Create namespace with timestamp uid, bigint key
+(1 row)
+
+SELECT topn_create_namespace('test5', 'timestamp', 'bigint');
+ topn_create_namespace 
+-----------------------
+ topn_test5
+(1 row)
+
+SELECT 'Table created:' as info, tablename FROM pg_tables WHERE tablename = 'topn_test5';
+      info      | tablename  
+----------------+------------
+ Table created: | topn_test5
+(1 row)
+
+SELECT 'Table structure:' as info, column_name, data_type, character_maximum_length FROM information_schema.columns WHERE table_name = 'topn_test5' ORDER BY ordinal_position;
+       info       | column_name |          data_type          | character_maximum_length 
+------------------+-------------+-----------------------------+--------------------------
+ Table structure: | uid         | timestamp without time zone |                         
+ Table structure: | key         | bigint                      |                         
+ Table structure: | frequently  | bigint                      |                         
+(3 rows)
+
+ROLLBACK;
+BEGIN;
+SELECT 'Test 7: Error - Create duplicate namespace (should fail)' as test_log;
+                         test_log                         
+----------------------------------------------------------
+ Test 7: Error - Create duplicate namespace (should fail)
+(1 row)
+
+SELECT topn_create_namespace('test1');
+ topn_create_namespace 
+-----------------------
+ topn_test1
+(1 row)
+
+ROLLBACK;
+SELECT 'Duplicate creation properly blocked' as result;
+               result                
+-------------------------------------
+ Duplicate creation properly blocked
+(1 row)
+
+BEGIN;
+SELECT 'Test 8: Error - Invalid type (should fail)' as test_log;
+                  test_log                  
+--------------------------------------------
+ Test 8: Error - Invalid type (should fail)
+(1 row)
+
+SELECT topn_create_namespace('test6', 'invalid_type', 'varchar');
+NOTICE:  Error creating table: Invalid uid_type: invalid_type. Allowed types: int, integer, bigint, varchar, timestamp, date, uuid
+ERROR:  Invalid uid_type: invalid_type. Allowed types: int, integer, bigint, varchar, timestamp, date, uuid
+CONTEXT:  PL/pgSQL function topn_create_namespace(character varying,text,text) line 26 at RAISE
+ROLLBACK;
+SELECT 'Invalid type properly blocked' as result;
+            result             
+-------------------------------
+ Invalid type properly blocked
+(1 row)
+
+BEGIN;
+SELECT 'Test 9: Add data with different types' as test_log;
+               test_log                
+---------------------------------------
+ Test 9: Add data with different types
+(1 row)
+
+SELECT topn_create_namespace('test1');
+ topn_create_namespace 
+-----------------------
+ topn_test1
+(1 row)
+
+SELECT topn_add('test1', 'user1'::varchar, 'click'::varchar, 5);
+ topn_add 
+----------
+        5
+(1 row)
+
+SELECT topn_add('test1', 'user1'::varchar, 'view'::varchar, 3);
+ topn_add 
+----------
+        3
+(1 row)
+
+SELECT topn_add('test1', 'user2'::varchar, 'click'::varchar, 2);
+ topn_add 
+----------
+        2
+(1 row)
+
+SELECT 'Data in test1:' as info;
+      info      
+----------------
+ Data in test1:
+(1 row)
+
+SELECT * FROM topn_test1 ORDER BY uid, frequently DESC;
+  uid  |  key  | frequently 
+-------+-------+------------
+ user1 | click |          5
+ user1 | view  |          3
+ user2 | click |          2
+(3 rows)
+
+SELECT topn_create_namespace('test2', 'integer', 'varchar(100)');
+ topn_create_namespace 
+-----------------------
+ topn_test2
+(1 row)
+
+SELECT topn_add('test2', 12345, 'login'::varchar, 10);
+ topn_add 
+----------
+       10
+(1 row)
+
+SELECT topn_add('test2', 12345, 'page_view'::varchar, 7);
+ topn_add 
+----------
+        7
+(1 row)
+
+SELECT topn_add('test2', 67890, 'login'::varchar, 5);
+ topn_add 
+----------
+        5
+(1 row)
+
+SELECT topn_add('test2', 12345, 'logout'::varchar, 2);
+ topn_add 
+----------
+        2
+(1 row)
+
+SELECT 'Data in test2 (integer uid):' as info;
+             info             
+------------------------------
+ Data in test2 (integer uid):
+(1 row)
+
+SELECT * FROM topn_test2 ORDER BY uid, frequently DESC;
+  uid  |    key    | frequently 
+-------+-----------+------------
+ 12345 | login     |         10
+ 12345 | page_view |          7
+ 12345 | logout    |          2
+ 67890 | login     |          5
+(4 rows)
+
+SELECT topn_create_namespace('test3', 'date', 'varchar(100)');
+ topn_create_namespace 
+-----------------------
+ topn_test3
+(1 row)
+
+SELECT topn_add('test3', '2026-03-17'::date, 'daily_active'::varchar, 100);
+ topn_add 
+----------
+      100
+(1 row)
+
+SELECT topn_add('test3', '2026-03-17'::date, 'daily_active'::varchar, 85);
+ topn_add 
+----------
+      185
+(1 row)
+
+SELECT topn_add('test3', '2026-03-17'::date, 'new_users'::varchar, 25);
+ topn_add 
+----------
+       25
+(1 row)
+
+SELECT 'Data in test3 (date uid):' as info;
+           info            
+---------------------------
+ Data in test3 (date uid):
+(1 row)
+
+SELECT * FROM topn_test3 ORDER BY uid, frequently DESC;
+    uid     |     key      | frequently 
+------------+--------------+------------
+ 03-17-2026 | daily_active |        185
+ 03-17-2026 | new_users    |         25
+(2 rows)
+
+SELECT topn_create_namespace('test4', 'uuid', 'integer');
+ topn_create_namespace 
+-----------------------
+ topn_test4
+(1 row)
+
+SELECT topn_add('test4', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid, 42, 15);
+ topn_add 
+----------
+       15
+(1 row)
+
+SELECT topn_add('test4', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid, 7, 8);
+ topn_add 
+----------
+        8
+(1 row)
+
+SELECT topn_add('test4', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22'::uuid, 42, 5);
+ topn_add 
+----------
+        5
+(1 row)
+
+SELECT 'Data in test4 (uuid uid, int key):' as info;
+                info                
+------------------------------------
+ Data in test4 (uuid uid, int key):
+(1 row)
+
+SELECT * FROM topn_test4 ORDER BY uid, frequently DESC;
+                 uid                  | key | frequently 
+--------------------------------------+-----+------------
+ a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 |  42 |         15
+ a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 |   7 |          8
+ b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22 |  42 |          5
+(3 rows)
+
+SELECT topn_create_namespace('test5', 'timestamp', 'bigint');
+ topn_create_namespace 
+-----------------------
+ topn_test5
+(1 row)
+
+SELECT topn_add('test5', '2024-01-01 10:00:00'::timestamp, 1000, 50);
+ topn_add 
+----------
+       50
+(1 row)
+
+SELECT topn_add('test5', '2024-01-01 10:00:00'::timestamp, 2000, 30);
+ topn_add 
+----------
+       30
+(1 row)
+
+SELECT topn_add('test5', '2024-01-01 11:00:00'::timestamp, 1000, 20);
+ topn_add 
+----------
+       20
+(1 row)
+
+SELECT 'Data in test5 (timestamp uid, bigint key):' as info;
+                    info                    
+--------------------------------------------
+ Data in test5 (timestamp uid, bigint key):
+(1 row)
+
+SELECT * FROM topn_test5 ORDER BY uid, frequently DESC;
+           uid            | key  | frequently 
+--------------------------+------+------------
+ Mon Jan 01 10:00:00 2024 | 1000 |         50
+ Mon Jan 01 10:00:00 2024 | 2000 |         30
+ Mon Jan 01 11:00:00 2024 | 1000 |         20
+(3 rows)
+
+ROLLBACK;
