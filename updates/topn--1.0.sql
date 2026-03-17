@@ -83,7 +83,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION topn_add(
     namespace varchar,
-    p_uid ANYELEMENT,
+    p_uid integer,
     p_key ANYELEMENT,
     p_frequently bigint DEFAULT 1
 )
@@ -94,8 +94,171 @@ AS $$
 DECLARE
     table_name varchar;
     new_count bigint;
-    uid_type text;
-    key_type text;
+BEGIN
+    table_name := 'topn_' || namespace;
+    
+    EXECUTE format('
+        INSERT INTO %I (uid, key, frequently)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (uid, key)
+        DO UPDATE SET frequently = %I.frequently + $3
+        RETURNING frequently',
+        table_name, table_name
+    ) INTO new_count USING p_uid, p_key, p_frequently;
+    RETURN new_count;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'Error in topn_add: %', SQLERRM;
+        RAISE;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION topn_add(
+    namespace varchar,
+    p_uid bigint,
+    p_key ANYELEMENT,
+    p_frequently bigint DEFAULT 1
+)
+RETURNS bigint
+LANGUAGE plpgsql
+VOLATILE
+AS $$
+DECLARE
+    table_name varchar;
+    new_count bigint;
+BEGIN
+    table_name := 'topn_' || namespace;
+    
+    EXECUTE format('
+        INSERT INTO %I (uid, key, frequently)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (uid, key)
+        DO UPDATE SET frequently = %I.frequently + $3
+        RETURNING frequently',
+        table_name, table_name
+    ) INTO new_count USING p_uid, p_key, p_frequently;
+    RETURN new_count;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'Error in topn_add: %', SQLERRM;
+        RAISE;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION topn_add(
+    namespace varchar,
+    p_uid varchar,
+    p_key ANYELEMENT,
+    p_frequently bigint DEFAULT 1
+)
+RETURNS bigint
+LANGUAGE plpgsql
+VOLATILE
+AS $$
+DECLARE
+    table_name varchar;
+    new_count bigint;
+BEGIN
+    table_name := 'topn_' || namespace;
+    
+    EXECUTE format('
+        INSERT INTO %I (uid, key, frequently)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (uid, key)
+        DO UPDATE SET frequently = %I.frequently + $3
+        RETURNING frequently',
+        table_name, table_name
+    ) INTO new_count USING p_uid, p_key, p_frequently;
+    RETURN new_count;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'Error in topn_add: %', SQLERRM;
+        RAISE;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION topn_add(
+    namespace varchar,
+    p_uid timestamp,
+    p_key ANYELEMENT,
+    p_frequently bigint DEFAULT 1
+)
+RETURNS bigint
+LANGUAGE plpgsql
+VOLATILE
+AS $$
+DECLARE
+    table_name varchar;
+    new_count bigint;
+BEGIN
+    table_name := 'topn_' || namespace;
+    
+    EXECUTE format('
+        INSERT INTO %I (uid, key, frequently)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (uid, key)
+        DO UPDATE SET frequently = %I.frequently + $3
+        RETURNING frequently',
+        table_name, table_name
+    ) INTO new_count USING p_uid, p_key, p_frequently;
+    RETURN new_count;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'Error in topn_add: %', SQLERRM;
+        RAISE;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION topn_add(
+    namespace varchar,
+    p_uid date,
+    p_key ANYELEMENT,
+    p_frequently bigint DEFAULT 1
+)
+RETURNS bigint
+LANGUAGE plpgsql
+VOLATILE
+AS $$
+DECLARE
+    table_name varchar;
+    new_count bigint;
+BEGIN
+    table_name := 'topn_' || namespace;
+    
+    EXECUTE format('
+        INSERT INTO %I (uid, key, frequently)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (uid, key)
+        DO UPDATE SET frequently = %I.frequently + $3
+        RETURNING frequently',
+        table_name, table_name
+    ) INTO new_count USING p_uid, p_key, p_frequently;
+    RETURN new_count;
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        RAISE NOTICE 'Error in topn_add: %', SQLERRM;
+        RAISE;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION topn_add(
+    namespace varchar,
+    p_uid uuid,
+    p_key ANYELEMENT,
+    p_frequently bigint DEFAULT 1
+)
+RETURNS bigint
+LANGUAGE plpgsql
+VOLATILE
+AS $$
+DECLARE
+    table_name varchar;
+    new_count bigint;
 BEGIN
     table_name := 'topn_' || namespace;
     

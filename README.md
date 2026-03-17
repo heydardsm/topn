@@ -1,6 +1,11 @@
 # TopN - PostgreSQL Extension for Top Value
 
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-orange.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-green.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-green.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-green.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14-green.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-green.svg)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12-green.svg)](https://www.postgresql.org/)
 
 TopN is an open-source PostgreSQL extension that returns top values in database according to some criteria.
 
@@ -68,11 +73,11 @@ SELECT topn_create_namespace('event_log', 'timestamp', 'bigint');
 
 ```sql
 -- Add with default increment (1)
-SELECT topn_add('tournament_scores', 101, 'player123');
-SELECT topn_add('tournament_scores', 101, 'player456');
+SELECT topn_add('tournament_scores', 101, 'player123'::varchar);
+SELECT topn_add('tournament_scores', 101, 'player456'::varchar);
 
 -- Add with specific increment
-SELECT topn_add('tournament_scores', 101, 'player123', 5);
+SELECT topn_add('tournament_scores', 101, 'player123'::varchar, 5);
 ```
 
 ### 3. Get Top N Values
@@ -109,6 +114,12 @@ SELECT * FROM topn('world_cup', 2022, 3);
 | `topn_create_namespace(base_name, uid_type, key_type)` | Creates a table named `topn_<base_name>` with specified column types |
 | `topn_add(namespace, uid, key, frequently)` | Adds or increments a count. Returns the new count |
 | `topn(namespace, uid, n)` | Returns top n (key, frequently) pairs for the specified uid |
+
+
+## Compatibility
+
+TopN is compatible with the PostgreSQL 12, 13, 14, 15, 16 and 17 releases.
+
 
 ## Performance
 
