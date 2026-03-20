@@ -281,7 +281,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION topn(
     namespace varchar,
-    p_uid anyelement,  -- anyelement allows any type
+    p_uid anyelement,
     n integer
 )
 RETURNS TABLE(key anyelement, frequently bigint)
