@@ -281,7 +281,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION topn(
     namespace varchar,
-    p_uid anyelement,  -- anyelement allows any type
+    p_uid anyelement,
     n integer
 )
 RETURNS TABLE(key anyelement, frequently bigint)
@@ -293,12 +293,19 @@ DECLARE
 BEGIN
     table_name := 'topn_' || namespace;
     RETURN QUERY EXECUTE format('
-        SELECT key, frequently
-        FROM %I
-        WHERE uid = %L
-        ORDER BY frequently DESC
-        LIMIT %s',
-        table_name, p_uid, n
+        WITH top_values as (
+            SELECT DISTINCT(frequently) as frequently
+            FROM %I
+            WHERE uid = %L
+            ORDER BY frequently DESC
+            LIMIT %s
+        )
+        SELECT t.key as key, t.frequently as frequently
+        FROM %I t
+        INNER JOIN top_values topv ON topv.frequently = t.frequently
+        WHERE t.uid = %L
+        ORDER BY frequently DESC',
+        table_name, p_uid, n, table_name, p_uid
     );
 END;
 $$;

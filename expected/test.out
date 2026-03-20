@@ -390,4 +390,35 @@ SELECT * FROM topn_test5 ORDER BY uid, frequently DESC;
  Mon Jan 01 11:00:00 2024 | 1000 |         20
 (3 rows)
 
+SELECT 'Test 10: Add data with duplicated frequently' as test_log;
+                   test_log                   
+----------------------------------------------
+ Test 10: Add data with duplicated frequently
+(1 row)
+
+SELECT topn_create_namespace('test6', 'int', 'int');
+ topn_create_namespace 
+-----------------------
+ topn_test6
+(1 row)
+
+SELECT topn_add('test6', 1, 1);
+ topn_add 
+----------
+        1
+(1 row)
+
+SELECT topn_add('test6', 1, 2);
+ topn_add 
+----------
+        1
+(1 row)
+
+SELECT * FROM topn('test6', 1, 1);
+ key | frequently 
+-----+------------
+   1 |          1
+   2 |          1
+(2 rows)
+
 ROLLBACK;

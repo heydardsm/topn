@@ -96,5 +96,10 @@ SELECT topn_add('test5', '2024-01-01 11:00:00'::timestamp, 1000, 20);
 SELECT 'Data in test5 (timestamp uid, bigint key):' as info;
 SELECT * FROM topn_test5 ORDER BY uid, frequently DESC;
 
+SELECT 'Test 10: Add data with duplicated frequently' as test_log;
+SELECT topn_create_namespace('test6', 'int', 'int');
+SELECT topn_add('test6', 1, 1);
+SELECT topn_add('test6', 1, 2);
+SELECT * FROM topn('test6', 1, 1);
 ROLLBACK;
 
